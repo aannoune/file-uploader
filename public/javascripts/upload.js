@@ -4,6 +4,26 @@ $('.upload-btn').on('click', function (){
     $('.progress-bar').width('0%');
 });
 
+$(document).ready(function() { 
+   $.ajax({ 
+           url:'/foldersList',
+           type: 'GET',
+           success: function(data){
+
+             data.list.forEach( function(mail,idx){
+              $('#folderSelect').append($('<option>', {value:mail, text:mail}));
+
+               })
+             
+              }
+           })
+   });
+ $('#folderSelect').on('change', function(){
+  console.log('folderSelect has changed')
+  if( $('#folderSelect').val()!=='') $('#uplBtn').attr('disabled',false);
+  else $('#uplBtn').attr('disabled',true);
+  })
+
 $('#upload-input').on('change', function(){
 
   var files = $(this).get(0).files;
@@ -12,14 +32,17 @@ $('#upload-input').on('change', function(){
     // create a FormData object which will be sent as the data payload in the
     // AJAX request
     var formData = new FormData();
-
+    
     // loop through all the selected files and add them to the formData object
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
 
       // add the files to formData object for the data payload
+
+      formData.append('mail', $('#folderSelect').val());
       formData.append('uploads[]', file, file.name);
     }
+    console.log(formData)
 
     $.ajax({
       url: '/upload',
@@ -49,6 +72,7 @@ $('#upload-input').on('change', function(){
             // once the upload reaches 100%, set the progress bar text to done
             if (percentComplete === 100) {
               $('.progress-bar').html('Done');
+              $('#uplBtn').attr('disabled',true);
             }
 
           }
