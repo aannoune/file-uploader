@@ -9,7 +9,7 @@
     "lint-fix": "eslint --fix *.js"
 
   },
-  "author": "Fady Makram",
+  "author": "Alex Announe (based on Fady Makram)",
   "license": "MIT",
   "dependencies": {
     "express": "^4.13.3",
