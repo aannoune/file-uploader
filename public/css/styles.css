@@ -67,3 +67,10 @@ h2 {
     width: 450px;
   }
 }
+
+
+#fileInfo{
+  background-color:#EEEEEE;
+  height:5em;
+  margin-bottom:0.2em;
+}

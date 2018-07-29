@@ -5,6 +5,7 @@ const formidable = require('formidable')
 const fs = require('fs')
 
 const express = require('express')
+const cookieParser = require('cookie-parser')
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
@@ -12,7 +13,21 @@ const io = require('socket.io')(http)
 const port=8881
 const uploadDir = path.join(__dirname, '/uploads')
 
+/*
+Seesion management 
+*/
+var session = require("express-session")({
+    secret: "my-secret",
+    resave: true,
+    saveUninitialized: true
+});
+var sharedsession = require("express-socket.io-session")
+app.use(session);
+app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+io.use(sharedsession(session, {
+    autoSave:true
+}));
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
@@ -26,14 +41,17 @@ app.get('/', function (req, res) {
 })
 app.get('/foldersList', (req, res) => {
   let dirList = fs.readdirSync(uploadDir).filter((file) => { return fs.statSync(uploadDir + '/' + file).isDirectory() })
-
+console.log(req.session)
   res.status(200).send({list: dirList})
 })
 
 app.post('/upload', function (req, res) {
+
+
+io.to(req.cookies.io).emit('filecount', 0)
   // create an incoming form object
   var form = new formidable.IncomingForm()
-var imgCount=1
+var imgCount=0
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true
   form.maxFileSize  = 2147483648
@@ -46,12 +64,13 @@ var imgCount=1
     fs.rename(file.path, path.join(form.uploadDir, file.name), (err) => {
       if (err) console.log(err)
       else imgCount++
-      	console.log(file.name)
-      	console.log(imgCount)
+      /*  console.log(file.name)
+        console.log(imgCount)*/
+      io.to(req.cookies.io).emit('filecount', imgCount)
     })
   })
   form.on('field', function (name, value) {
-    console.log(name, value)
+ 
     form.uploadDir = path.join(__dirname, '/uploads', value)
    
   })
@@ -80,5 +99,21 @@ http.listen(port, function () {
 
 
 io.on('connection', function(socket){
-console.log('a user connected');
+  
+console.log(`connect with id ${socket.id}` )
+
+    // Accept a login event with user's data
+  /*  socket.on("login", function(userdata) {
+      console.log()
+        socket.handshake.session.userdata = userdata;
+        socket.handshake.session.save();
+    });
+    socket.on("logout", function(userdata) {
+        if (socket.handshake.session.userdata) {
+            delete socket.handshake.session.userdata;
+            socket.handshake.session.save();
+        }
+    }); */
+
+
 });

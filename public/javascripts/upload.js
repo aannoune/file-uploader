@@ -1,7 +1,16 @@
+  var socket = io();
+  socket.on('filecount', function(count) {
+    console.log('count:'+count)
+     $('#fileInfo2').html('Nombre de fichiers correctement trait&#233;es:<span> '+count+'</span>')
+    })
+
+
+
 $('.upload-btn').on('click', function (){
     $('#upload-input').click();
     $('.progress-bar').text('0%');
     $('.progress-bar').width('0%');
+      $('#fileInfo2').html('&nbsp;')
 });
 
 $(document).ready(function() { 
@@ -18,6 +27,10 @@ $(document).ready(function() {
               }
            })
    });
+   
+   
+   
+   
  $('#folderSelect').on('change', function(){
   console.log('folderSelect has changed')
   if( $('#folderSelect').val()!=='') $('#uplBtn').attr('disabled',false);
@@ -42,7 +55,7 @@ $('#upload-input').on('change', function(){
       formData.append('mail', $('#folderSelect').val());
       formData.append('uploads[]', file, file.name);
     }
-    $('#fileInfo1').html('Nombre de fichiers a envoyer: '+files.length)
+    $('#fileInfo1').html('Nombre de fichiers a envoyer:<span>'+files.length+'</span>')
     console.log("Nbr de fichier:"+files.length)
     console.log(formData)
 
@@ -54,7 +67,7 @@ $('#upload-input').on('change', function(){
       contentType: false,
       success: function(data){
           console.log('upload successful!\n' + data);
-          $('#fileInfo2').html('Nombre de fichiers re&#231;us: '+data.count)
+         
       },
       xhr: function() { 
         // create an XMLHttpRequest
