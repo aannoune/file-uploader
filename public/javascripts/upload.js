@@ -42,6 +42,8 @@ $('#upload-input').on('change', function(){
       formData.append('mail', $('#folderSelect').val());
       formData.append('uploads[]', file, file.name);
     }
+    $('#fileInfo1').html('Nombre de fichiers a envoyer: '+files.length)
+    console.log("Nbr de fichier:"+files.length)
     console.log(formData)
 
     $.ajax({
@@ -52,14 +54,15 @@ $('#upload-input').on('change', function(){
       contentType: false,
       success: function(data){
           console.log('upload successful!\n' + data);
+          $('#fileInfo2').html('Nombre de fichiers re&#231;us: '+data.count)
       },
-      xhr: function() {
+      xhr: function() { 
         // create an XMLHttpRequest
         var xhr = new XMLHttpRequest();
 
         // listen to the 'progress' event
         xhr.upload.addEventListener('progress', function(evt) {
-
+          $('#uplBtn').attr('disabled',true);
           if (evt.lengthComputable) {
             // calculate the percentage of upload completed
             var percentComplete = evt.loaded / evt.total;
@@ -72,12 +75,16 @@ $('#upload-input').on('change', function(){
             // once the upload reaches 100%, set the progress bar text to done
             if (percentComplete === 100) {
               $('.progress-bar').html('Done');
-              $('#uplBtn').attr('disabled',true);
+              $('#uplBtn').attr('disabled',false);
             }
 
           }
 
-        }, false);
+        }, false),
+        xhr.upload.addEventListener('loadend', function(evt) {
+        	console.log(evt)
+        	
+        })
 
         return xhr;
       }
