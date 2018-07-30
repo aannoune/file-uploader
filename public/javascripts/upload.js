@@ -35,7 +35,40 @@ $(document).ready(function() {
   console.log('folderSelect has changed')
   if( $('#folderSelect').val()!=='') $('#uplBtn').attr('disabled',false);
   else $('#uplBtn').attr('disabled',true);
+ if( $('#folderSelect').val()!=='')
+       $.ajax({
+      url: '/setFolder',
+      type: 'PATCH',
+      data: 'folder='+$('#folderSelect').val(),
+      success: function(data){
+     $('#fileInfo1').html('Nombre de fichiers d&#233;ja pr&#233;sents:<span> '+data.fileList.length+'</span>')
+         
+      },
+       })
+
+  /*    $.ajax({
+      url: '/setFolder',
+      type: 'PATCH',
+      data: $('#folderSelect').val(),
+      processData: false,
+      contentType: false,
+      success: function(data){
+          console.log('upload successful!\n' + data);
+         
+      },
+      xhr: function() { 
+        // create an XMLHttpRequest
+
+
+        return xhr;
+      }
+        })    */
+    
   })
+
+
+
+
 
 $('#upload-input').on('change', function(){
 
