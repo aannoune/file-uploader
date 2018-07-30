@@ -2,6 +2,7 @@
 const path = require('path')
 const formidable = require('formidable')
 const fs = require('fs')
+const config = require('./config.json');
 
 const express = require('express')
 const cookieParser = require('cookie-parser')
@@ -10,11 +11,11 @@ const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 
-const port = 8881
+const port = config.port
 const uploadDir = path.join(__dirname, '/uploads')
 
 /*
-Seesion management
+Session management
 */
 var session = require('express-session')({
   secret: 'my-secret',
