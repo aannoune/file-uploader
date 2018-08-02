@@ -2,19 +2,19 @@
 const path = require('path')
 const formidable = require('formidable')
 const fs = require('fs')
-const config = require('./config.json');
+const config = require('./config.json')
 
 const express = require('express')
 const cookieParser = require('cookie-parser')
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 
 const port = config.port
 const uploadDir = config.uploadRoot
-console.log(`Upload dir: ${uploadDir}` )
-if (!fs.existsSync(config.uploadRoot)){
+console.log(`Upload dir: ${uploadDir}`)
+if (!fs.existsSync(config.uploadRoot)) {
   fs.mkdirSync(config.uploadRoot)
 }
 
@@ -27,11 +27,11 @@ var session = require('express-session')({
   saveUninitialized: true
 })
 var sharedsession = require('express-socket.io-session')
- app.use(session)
- app.use(cookieParser()).use(bodyParser.urlencoded({ extended: true }))
- app.use(bodyParser.json())
- app.use(express.static(path.join(__dirname, 'public')))
- io.use(sharedsession(session, {
+app.use(session)
+app.use(cookieParser()).use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+app.use(express.static(path.join(__dirname, 'public')))
+io.use(sharedsession(session, {
   autoSave: true
 }))
 
@@ -47,8 +47,8 @@ app.get('/', function (req, res) {
 })
 app.get('/login', function (req, res) {
   res.sendFile(path.join(__dirname, 'views/login.html'))
-   console.log(`req.sessionID :${req.sessionID}`)
-    console.log(req.session)
+  console.log(`req.sessionID :${req.sessionID}`)
+  console.log(req.session)
 })
 app.get('/foldersList', (req, res) => {
   let dirList = fs.readdirSync(uploadDir).filter((file) => { return fs.statSync(uploadDir + '/' + file).isDirectory() })
@@ -56,19 +56,18 @@ app.get('/foldersList', (req, res) => {
   res.status(200).send({list: dirList})
 })
 
-app.patch('/setFolder', function(req, res){
-console.log(req.body.folder)
-console.log(path.join(uploadDir,req.body.folder))
-let listOfFiles=fs.readdirSync( path.join(uploadDir,req.body.folder)).filter((file) => { return fs.statSync(path.join(uploadDir,req.body.folder,file)).isFile() }) 
+app.patch('/setFolder', function (req, res) {
+  console.log(req.body.folder)
+  console.log(path.join(uploadDir, req.body.folder))
+  let listOfFiles = fs.readdirSync(path.join(uploadDir, req.body.folder)).filter((file) => { return fs.statSync(path.join(uploadDir, req.body.folder, file)).isFile() })
 
-  res.status(200).send({status: 'folder sucessfully changed',fileList:listOfFiles})
+  res.status(200).send({status: 'folder sucessfully changed', fileList: listOfFiles})
 })
 
 app.post('/upload', function (req, res) {
-
   var form = new formidable.IncomingForm()
   var receivedBytes = 0
-  var testStr='toto'
+  var testStr = 'toto'
   var imgCount = 0
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true
@@ -82,11 +81,11 @@ app.post('/upload', function (req, res) {
     fs.rename(file.path, path.join(form.uploadDir, file.name), (err) => {
       if (err) console.log(err)
       else imgCount++
-       receivedBytes=file.size
-       console.log(`file.size: ${receivedBytes}`)
-       console.log(`testStr: ${testStr}`)
+      receivedBytes = file.size
+      console.log(`file.size: ${receivedBytes}`)
+      console.log(`testStr: ${testStr}`)
       //  console.log(imgCount) */
-      io.to(req.cookies.io).emit('saved', {name: file.name ,size:file.size, count:imgCount})
+      io.to(req.cookies.io).emit('saved', {name: file.name, size: file.size, count: imgCount})
     })
   })
   form.on('field', function (name, value) {
@@ -101,7 +100,7 @@ app.post('/upload', function (req, res) {
 
   // once all the files have been uploaded, send a response to the client
   form.on('end', function () {
-    console.log('END !! '+receivedBytes)
+    console.log('END !! ' + receivedBytes)
     res.setHeader('content-type', 'application/json')
     res.end(JSON.stringify({status: 'success', receivedBytes: form.openedFiles[0].size}))
   })
