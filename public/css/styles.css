@@ -21,6 +21,7 @@ body {
   color: #ffffff;
   background-color: #F89406;
   border: none;
+  margin-bottom: 0.2em;
 }
 
 .upload-btn:hover,
@@ -64,13 +65,76 @@ h2 {
 
 @media (min-width: 992px) {
   .container {
-    width: 450px;
+/*  width: 450px;*/
   }
 }
 
 
 #fileInfo{
   background-color:#EEEEEE;
-  height:5em;
+  min-height:12em;
+  /*height:12em;
+  overflow: auto;*/
   margin-bottom:0.2em;
 }
+#fileInfo2{
+  text-align: left;
+}
+#fileInfo2>div {
+    background-color: #fff;
+    /* margin-bottom: 2px; */
+    /* text-align: left; */
+    margin: 5px 5px 5px 5px;
+    display: inline-grid;
+    /* background-color: red; */
+    padding: 0px;
+    font-size: 0.8em;
+    text-align: left;
+    border:solid 2px white;
+  width:94px;
+  height:94px; 
+}
+
+.placeholder{
+   width:90px;
+ height:90px;
+backgroun-color:black;  
+}
+.i_name{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+}
+.thumb {
+  max-width:90px;
+  max-height:90px;
+  display: block
+  }
+  
+  .uploadDiv {
+    height: 90px;
+    width: 90px;
+    /* background-color: blue; */
+    z-index: 2;
+    display: none;
+    position: absolute;
+
+    background-size: contain;
+    background-repeat: no-repeat;
+
+}
+.running{
+      background-image: url(https://gifimage.net/wp-content/uploads/2017/11/gif-upload-14.gif);
+     display: block;
+}
+.uploadOk{
+  background-image: url(https://i0.wp.com/plastrack.com/wp-content/uploads/2018/02/Serviceok.png?w=3840);
+      background-size: 3em;
+     display: block;
+    background-position-x: left;
+    background-position-y: bottom;
+  }
+
+    .debg_count{ 
+      display:none}

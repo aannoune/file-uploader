@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Transfert de fichiers </title>
+  <title>Transfert de fichiers</title>
   <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <link href="css/styles.css" rel="stylesheet">
@@ -13,23 +13,35 @@
 
 </head>
 <body>
-
+<div id="debg_count">
+    <span class="dbg_nbr">  </span> <span class="dbg_nbr2">  </span><span class="dbg_percent"></span>
+  </div>  
   <div class="container">
     <div class="row">
       <div class="col-xs-12">
         <div class="panel panel-default">
           <div class="panel-body">
-            <span class="glyphicon glyphicon-cloud-upload"></span>
-            <h2>File Uploader</h2>
-            <label for="folderSelect">Choisir son email:</label>&nbsp;<select id="folderSelect" name="folderSelect"><option></option></select></select>
+
+            <h2>Envoyer des fichiers photos ou video</h2>
+            <div class="row">
+             <div class="form-group">
+               <label for="folderSelect" class="control-label col-sm-2 col-form-label">Choisir son nom:</label>
+               <div class="col-sm-8">
+               <select class="form-control form-control-lg" id="folderSelect" name="folderSelect"><option></option></select>
+              </div>
+            </div>
+          </div>
             <div class="progress">
               <div class="progress-bar" role="progressbar"></div>
             </div>
               <div id ="fileInfo">
             <div id ="fileInfo1" class="file-info" ></div>
             <div id ="fileInfo2" class="file-info" ></div>
+
             </div>
             <button id="uplBtn" disabled class="btn btn-lg upload-btn" type="button">Charger des fichier</button> 
+           
+            <button id="sendBtn" disabled class="btn btn-lg upload-btn" type="button">Envoyer les fichier</button> 
           </div>
         </div>
       </div>

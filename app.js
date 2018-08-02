@@ -12,22 +12,26 @@ const http = require('http').Server(app)
 const io = require('socket.io')(http)
 
 const port = config.port
-const uploadDir = path.join(__dirname, '/uploads')
+const uploadDir = config.uploadRoot
+console.log(`Upload dir: ${uploadDir}` )
+if (!fs.existsSync(config.uploadRoot)){
+  fs.mkdirSync(config.uploadRoot)
+}
 
 /*
 Session management
 */
 var session = require('express-session')({
-  secret: 'my-secret',
+  secret: 'ketnsdlSs!t',
   resave: true,
   saveUninitialized: true
 })
 var sharedsession = require('express-socket.io-session')
-app.use(session)
-app.use(cookieParser()).use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'public')))
-io.use(sharedsession(session, {
+ app.use(session)
+ app.use(cookieParser()).use(bodyParser.urlencoded({ extended: true }))
+ app.use(bodyParser.json())
+ app.use(express.static(path.join(__dirname, 'public')))
+ io.use(sharedsession(session, {
   autoSave: true
 }))
 
@@ -40,6 +44,11 @@ app.use(function (req, res, next) {
 
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'views/index.html'))
+})
+app.get('/login', function (req, res) {
+  res.sendFile(path.join(__dirname, 'views/login.html'))
+   console.log(`req.sessionID :${req.sessionID}`)
+    console.log(req.session)
 })
 app.get('/foldersList', (req, res) => {
   let dirList = fs.readdirSync(uploadDir).filter((file) => { return fs.statSync(uploadDir + '/' + file).isDirectory() })
@@ -56,15 +65,16 @@ let listOfFiles=fs.readdirSync( path.join(uploadDir,req.body.folder)).filter((fi
 })
 
 app.post('/upload', function (req, res) {
-  io.to(req.cookies.io).emit('filecount', 0)
-  // create an incoming form object
+
   var form = new formidable.IncomingForm()
+  var receivedBytes = 0
+  var testStr='toto'
   var imgCount = 0
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true
   form.maxFileSize = 2147483648
   // store all uploads in the /uploads directory
-  form.uploadDir = path.join(__dirname, '/uploads')
+  form.uploadDir = path.join(uploadDir)
 
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
@@ -72,13 +82,15 @@ app.post('/upload', function (req, res) {
     fs.rename(file.path, path.join(form.uploadDir, file.name), (err) => {
       if (err) console.log(err)
       else imgCount++
-      /*  console.log(file.name)
-        console.log(imgCount) */
-      io.to(req.cookies.io).emit('filecount', imgCount)
+       receivedBytes=file.size
+       console.log(`file.size: ${receivedBytes}`)
+       console.log(`testStr: ${testStr}`)
+      //  console.log(imgCount) */
+      io.to(req.cookies.io).emit('saved', {name: file.name ,size:file.size, count:imgCount})
     })
   })
   form.on('field', function (name, value) {
-    form.uploadDir = path.join(__dirname, '/uploads', value)
+    form.uploadDir = path.join(uploadDir, value)
   })
   // log any errors that occur
   form.on('error', function (err) {
@@ -89,9 +101,9 @@ app.post('/upload', function (req, res) {
 
   // once all the files have been uploaded, send a response to the client
   form.on('end', function () {
-    console.log('END !! ')
+    console.log('END !! '+receivedBytes)
     res.setHeader('content-type', 'application/json')
-    res.end(JSON.stringify({status: 'success', count: imgCount}))
+    res.end(JSON.stringify({status: 'success', receivedBytes: form.openedFiles[0].size}))
   })
 
   // parse the incoming request containing the form data
