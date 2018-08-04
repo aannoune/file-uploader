@@ -9,7 +9,7 @@
     console.log('saved: name '+data.name+ " size: "+data.size)
     var divId='#d_'+ Base64.encode(data.name).replace(/=/gi,'')
     console.log('change: '+divId)
-   $(divId).css('border-color','lime')
+
     
     })
 
@@ -22,28 +22,9 @@ $('#uplBtn').on('click', function (){
 });
 
 $(document).ready(function() { 
-   $.ajax({ 
-           url:'/foldersList',
-           type: 'GET',
-           success: function(data){
+$('#uplBtn').attr('disabled',false);
 
-             data.list.forEach( function(mail,idx){
-              $('#folderSelect').append($('<option>', {value:mail, text:mail}));
 
-               })
-             
-              }
-           })
-   });
-   
-   
-   
-   
- $('#folderSelect').on('change', function(){
-  console.log('folderSelect has changed')
-  if( $('#folderSelect').val()!=='') $('#uplBtn').attr('disabled',false);
-  else $('#uplBtn').attr('disabled',true);
- if( $('#folderSelect').val()!=='')
        $.ajax({
       url: '/setFolder',
       type: 'PATCH',
@@ -53,26 +34,13 @@ $(document).ready(function() {
          
       },
        })
-
-  /*    $.ajax({
-      url: '/setFolder',
-      type: 'PATCH',
-      data: $('#folderSelect').val(),
-      processData: false,
-      contentType: false,
-      success: function(data){
-          console.log('upload successful!\n' + data);
-         
-      },
-      xhr: function() { 
-        // create an XMLHttpRequest
-
-
-        return xhr;
-      }
-        })    */
     
-  })
+   });
+   
+   
+   
+   
+
 
 
 $('#upload-input__').on('change', function(){
@@ -89,8 +57,6 @@ $('#upload-input__').on('change', function(){
       var file = files[i];
 
       // add the files to formData object for the data payload
-
-      formData.append('mail', $('#folderSelect').val());
       formData.append('uploads[]', file, file.name);
     }
     $('#fileInfo1').html('Nombre de fichiers a envoyer:<span>'+files.length+'</span>')
@@ -164,7 +130,7 @@ console.log("upload-input has changed")
        var file = files[i];
        fileList.push(file)
        formInfo.weight2send+=file.size
-       fData.set('mail', $('#folderSelect').val());
+
        file.id=Base64.encode(file. name).replace(/=/gi,'')
        fData.append('uploads', file, file.name);
        console.log(fData)

@@ -1,4 +1,12 @@
 {
-"port":8881
+ "development":{
+  "port":8882,
+  "uploadRoot":"/tmp/upload"
+ },
+ "production":{
+  "port":8881,
+  "uploadRoot":"/tmp/upload"
+ }
+ 
 }
 

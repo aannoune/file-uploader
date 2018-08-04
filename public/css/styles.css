@@ -37,12 +37,12 @@ h4 {
   padding-bottom: 30px;
   color: #B8BDC1;
 }
-
+/*
 .glyphicon {
   font-size: 5em;
   color: #9CA3A9;
 }
-
+*/
 h2 {
   margin-top: 15px;
   color: #68757E;
@@ -138,3 +138,17 @@ backgroun-color:black;
 
     .debg_count{ 
       display:none}
+      
+      
+
+.login-panel {
+    width: 50em;
+    margin: auto;
+  text-align: left;
+  }
+  
+#logout-bt{
+  position:sticky;
+  float:right;
+  
+}

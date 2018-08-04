@@ -2,7 +2,10 @@
 const path = require('path')
 const formidable = require('formidable')
 const fs = require('fs')
-const config = require('./config.json')
+
+const environment = (typeof process.env.NODE_ENV !== 'undefined') ? process.env.NODE_ENV : 'development'
+const config = require('./config.json')[environment]
+const userDb = require('./users.json')
 
 const express = require('express')
 const cookieParser = require('cookie-parser')
@@ -11,6 +14,9 @@ const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 
+const passport = require('passport')
+
+console.log(`environment: ${environment}`)
 const port = config.port
 const uploadDir = config.uploadRoot
 console.log(`Upload dir: ${uploadDir}`)
@@ -21,16 +27,20 @@ if (!fs.existsSync(config.uploadRoot)) {
 /*
 Session management
 */
+
 var session = require('express-session')({
   secret: 'ketnsdlSs!t',
   resave: true,
   saveUninitialized: true
 })
 var sharedsession = require('express-socket.io-session')
+
 app.use(session)
 app.use(cookieParser()).use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(passport.initialize())
+app.use(passport.session())
 io.use(sharedsession(session, {
   autoSave: true
 }))
@@ -42,24 +52,86 @@ app.use(function (req, res, next) {
   next()
 })
 
-app.get('/', function (req, res) {
+app.get('/success', (req, res) => res.send('Welcome ' + req.query.username + '!!'))
+app.get('/error', (req, res) => res.send('error logging in'))
+
+var loggedUsersCache = {}
+passport.serializeUser(function (userDetails, cb) {
+
+  loggedUsersCache[userDetails.id] = userDetails
+  cb(null, userDetails.id)
+})
+passport.deserializeUser(function (id, cb) {
+  cb(null, loggedUsersCache[id])
+})
+
+const passportCustom = require('passport-custom')
+const CustomStrategy = passportCustom.Strategy
+
+passport.use('custom-strategy', new CustomStrategy(
+  function (req, callback) {
+    if (req.body.email) {
+
+      let validAccount = false
+      userDb.accounts.forEach((account, idx) => {
+
+        if (account.email === req.body.email && req.body.password === account.password) { validAccount = account }
+      })
+
+      if (validAccount) {
+        callback(null, validAccount)
+      } else callback(null, null, { message: 'something is wrong' })
+    } else { if (!req.session.passport) {
+        callback(null, false)
+      } else {
+        let validAccount = false
+
+        userDb.accounts.forEach((account, idx) => {
+
+          if (account.id === req.session.passport.user) { validAccount = account }
+        })
+        if (validAccount) callback(null, validAccount)
+        else callback(false, null) }
+    }
+  }
+))
+
+app.get('/', passport.authenticate('custom-strategy', { failureRedirect: '/login' }), function (req, res) {
   res.sendFile(path.join(__dirname, 'views/index.html'))
 })
+
+app.get('/logout',
+  function (req, res) {
+    req.session.destroy()
+
+    res.redirect('/')
+  })
+
 app.get('/login', function (req, res) {
   res.sendFile(path.join(__dirname, 'views/login.html'))
-  console.log(`req.sessionID :${req.sessionID}`)
-  console.log(req.session)
+
 })
+app.post('/login',
+  passport.authenticate('custom-strategy', { failureRedirect: '/login?error', successRedirect: '/' }),
+  function (req, res) {
+
+
+    res.redirect('/')
+  })
+
+/****************************************************************/
+
 app.get('/foldersList', (req, res) => {
   let dirList = fs.readdirSync(uploadDir).filter((file) => { return fs.statSync(uploadDir + '/' + file).isDirectory() })
-  console.log(req.session)
+
   res.status(200).send({list: dirList})
 })
 
 app.patch('/setFolder', function (req, res) {
-  console.log(req.body.folder)
-  console.log(path.join(uploadDir, req.body.folder))
-  let listOfFiles = fs.readdirSync(path.join(uploadDir, req.body.folder)).filter((file) => { return fs.statSync(path.join(uploadDir, req.body.folder, file)).isFile() })
+  let userFolder = getUserbyId(req.session.passport.user).folder
+
+  fs.existsSync(path.join(uploadDir, userFolder)) || fs.mkdirSync(path.join(uploadDir, userFolder))
+  let listOfFiles = fs.readdirSync(path.join(uploadDir, userFolder)).filter((file) => { return fs.statSync(path.join(uploadDir, userFolder, file)).isFile() })
 
   res.status(200).send({status: 'folder sucessfully changed', fileList: listOfFiles})
 })
@@ -67,13 +139,13 @@ app.patch('/setFolder', function (req, res) {
 app.post('/upload', function (req, res) {
   var form = new formidable.IncomingForm()
   var receivedBytes = 0
-  var testStr = 'toto'
+
   var imgCount = 0
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true
   form.maxFileSize = 2147483648
   // store all uploads in the /uploads directory
-  form.uploadDir = path.join(uploadDir)
+  form.uploadDir = path.join(uploadDir, userDb.accounts[req.session.passport.user].folder)
 
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
@@ -82,8 +154,8 @@ app.post('/upload', function (req, res) {
       if (err) console.log(err)
       else imgCount++
       receivedBytes = file.size
-      console.log(`file.size: ${receivedBytes}`)
-      console.log(`testStr: ${testStr}`)
+
+
       //  console.log(imgCount) */
       io.to(req.cookies.io).emit('saved', {name: file.name, size: file.size, count: imgCount})
     })
@@ -100,7 +172,7 @@ app.post('/upload', function (req, res) {
 
   // once all the files have been uploaded, send a response to the client
   form.on('end', function () {
-    console.log('END !! ' + receivedBytes)
+    
     res.setHeader('content-type', 'application/json')
     res.end(JSON.stringify({status: 'success', receivedBytes: form.openedFiles[0].size}))
   })
@@ -114,18 +186,14 @@ http.listen(port, function () {
 })
 
 io.on('connection', function (socket) {
-  console.log(`connect with id ${socket.id}`)
 
-  // Accept a login event with user's data
-  /*  socket.on("login", function(userdata) {
-      console.log()
-        socket.handshake.session.userdata = userdata;
-        socket.handshake.session.save();
-    });
-    socket.on("logout", function(userdata) {
-        if (socket.handshake.session.userdata) {
-            delete socket.handshake.session.userdata;
-            socket.handshake.session.save();
-        }
-    }); */
 })
+
+function getUserbyId (id) {
+  let validAccount = false
+  userDb.accounts.forEach((account, idx) => {
+  // console.log(account)
+    if (account.id === id) { validAccount = account }
+  })
+  return validAccount
+}
