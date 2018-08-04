@@ -142,9 +142,10 @@ backgroun-color:black;
       
 
 .login-panel {
-    width: 50em;
+    padding: 0 20px 0 20px;
     margin: auto;
   text-align: left;
+  max-width: 30em;
   }
   
 #logout-bt{
