@@ -1,0 +1,23 @@
+{
+"accounts": [
+  {"id":0,
+   "name": "alex",
+   "email":"alex@aboulafia.com",
+   "password":"1234",
+   "folder":"alex"
+  },
+  {"id":1,
+   "name": "clement",
+   "email":"clement@aboulafia.com",
+   "password":"1234",
+   "folder":"clement"
+  },
+  {"id":3,
+   "name": "valerie",
+   "email":"valerie@debarbentane.fr",
+   "password":"1234",
+   "folder":"valerie"
+  }
+ ]
+
+}
