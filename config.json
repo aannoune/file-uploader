@@ -5,7 +5,7 @@
  },
  "production":{
   "port":8881,
-  "uploadRoot":"/tmp/upload"
+  "uploadRoot":"/home/debarbentane/upload"
  }
  
 }
