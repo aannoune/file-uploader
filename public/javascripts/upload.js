@@ -18,7 +18,7 @@ $('#uplBtn').on('click', function (){
     $('#upload-input').click();
     $('.progress-bar').text('0%');
     $('.progress-bar').width('0%');
-      $('#fileInfo2').html('&nbsp;')
+ 
 });
 
 $(document).ready(function() { 
@@ -124,6 +124,7 @@ console.log("upload-input has changed")
     var fileList=[]
     formInfo.dataList = []
    var readerArray=[]
+     $('#fileInfo2').html('&nbsp;')
     // loop through all the selected files and add them to the formData object
     for (var i = 0; i < files.length; i++) {
        var fData = new FormData();
